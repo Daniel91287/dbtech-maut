@@ -120,7 +120,7 @@ public class MautVerwaltungTest {
      */
     @org.junit.Test
     public void testMautverwaltung_5() throws Exception {
-        // Das Fahrzeug mir der ID 100441556794623 soll aus der Datenbank gelöscht werden.
+        // Das Fahrzeug mit der ID 100441556794623 soll aus der Datenbank gelöscht werden.
         maut.deleteVehicle(100441556794623L);
         Connection c = dbTesterCon.getConnection();
         int actual = countRecords(dbTesterCon.getConnection(), "FAHRZEUG", "fz_id = 100441556794623");

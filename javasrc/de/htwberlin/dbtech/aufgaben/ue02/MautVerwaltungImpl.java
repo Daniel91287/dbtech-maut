@@ -1,7 +1,11 @@
 package de.htwberlin.dbtech.aufgaben.ue02;
 
-import java.sql.Connection;
+import java.sql.*;
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
+
+import de.htwberlin.dbtech.utils.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.htwberlin.dbtech.exceptions.DataException;
@@ -30,39 +34,128 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 
 	@Override
 	public String getStatusForOnBoardUnit(long fzg_id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        String s = null;
+        connection = JdbcUtils.getConnectionViaDriverManager( // DB-URL,
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        try (PreparedStatement statement = connection.prepareStatement("SELECT Status FROM FAHRZEUGGERAT f WHERE FZG_ID = ?")) {
+            statement.setLong(1, fzg_id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                s = rs.getString("Status");
+
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException();
+        } finally {
+            JdbcUtils.closeConnectionQuietly(connection);
+        }
+        return s;
+    }
 
 	@Override
 	public int getUsernumber(int maut_id) {
-		// TODO Auto-generated method stub
-		return 0;
+		int i = 0;
+        connection = JdbcUtils.getConnectionViaDriverManager(
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        try(PreparedStatement statement = connection.prepareStatement(
+                "SELECT Nutzer_ID FROM MAUTERHEBUNG m \n" +
+                "JOIN FAHRZEUGGERAT f ON f.FZG_ID = m.FZG_ID \n" +
+                "JOIN FAHRZEUG f2 ON f2.FZ_ID = f.FZ_ID \n" +
+                "WHERE Maut_ID = ?")){
+            statement.setInt(1, maut_id);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next()){
+                i = rs.getInt("Nutzer_ID");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            JdbcUtils.closeConnectionQuietly(connection);
+        }
+        return i;
 	}
 
 	@Override
 	public void registerVehicle(long fz_id, int sskl_id, int nutzer_id, String kennzeichen, String fin, int achsen,
-			int gewicht, String zulassungsland) {
-		// TODO Auto-generated method stub
+                                int gewicht, String zulassungsland) {
+		connection = JdbcUtils.getConnectionViaDriverManager(
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        try (PreparedStatement statement = connection.prepareStatement("Insert into FAHRZEUG " +
+                "(FZ_ID,SSKL_ID,NUTZER_ID,KENNZEICHEN,FIN,ACHSEN,GEWICHT,ANMELDEDATUM,ABMELDEDATUM,ZULASSUNGSLAND) " +
+                "values (?,?,?,?,?,?,?," +
+                "?,null,?)")) {
+            statement.setLong(1, fz_id);
+            statement.setInt(2, sskl_id);
+            statement.setInt(3, nutzer_id);
+            statement.setString(4, kennzeichen);
+            statement.setString(5, fin);
+            statement.setInt(6, achsen);
+            statement.setInt(7, gewicht);
+            statement.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+            statement.setString(9, zulassungsland);
+            statement.executeUpdate();
+
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
 
 	}
 
 	@Override
 	public void updateStatusForOnBoardUnit(long fzg_id, String status) {
-		// TODO Auto-generated method stub
+		Connection connection = JdbcUtils.getConnectionViaDriverManager(
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        try(PreparedStatement statement = connection.prepareStatement("" +
+                "UPDATE FAHRZEUGGERAT SET status = ? WHERE FZG_ID = ?")){
+            statement.setString(1, status);
+            statement.setLong(2, fzg_id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
 	}
 
 	@Override
 	public void deleteVehicle(long fz_id) {
-		// TODO Auto-generated method stub
+		connection = JdbcUtils.getConnectionViaDriverManager(
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        try (PreparedStatement statement = connection.prepareStatement("" +
+                "DELETE FROM FAHRZEUG WHERE fz_id = ?")){
+            statement.setLong(1, fz_id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
 	}
 
 	@Override
 	public List<Mautabschnitt> getTrackInformations(String abschnittstyp) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        connection = JdbcUtils.getConnectionViaDriverManager(
+                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
+                "u596680", "p596680");
+        List<Mautabschnitt> list = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT * FROM MAUTABSCHNITT m WHERE Abschnittstyp LIKE ?")) {
+            statement.setString(1, abschnittstyp);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Mautabschnitt m = new Mautabschnitt(rs.getInt(1), rs.getInt(2),
+                        rs.getString(3), rs.getString(4),
+                        rs.getString(5), rs.getString(6));
+                list.add(m);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
 
 }

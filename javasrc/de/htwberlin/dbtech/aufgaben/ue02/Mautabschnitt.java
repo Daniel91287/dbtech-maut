@@ -1,5 +1,7 @@
 package de.htwberlin.dbtech.aufgaben.ue02;
 
+import java.sql.SQLOutput;
+
 public class Mautabschnitt {
 
 	/** die id des abschnitts **/
@@ -114,5 +116,14 @@ public class Mautabschnitt {
 	public void setAbschnittstyp(String abschnittstyp) {
 		this.abschnittstyp = abschnittstyp;
 	}
+
+    public void printAll(){
+        System.out.println(getAbschnitts_id());
+        System.out.println(getLaenge());
+        System.out.println(getStart_koordinate());
+        System.out.println(getZiel_koordinate());
+        System.out.println(getName());
+        System.out.println(getAbschnittstyp());
+    }
 
 }
