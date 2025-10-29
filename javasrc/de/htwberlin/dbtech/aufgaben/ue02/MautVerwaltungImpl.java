@@ -35,9 +35,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 	@Override
 	public String getStatusForOnBoardUnit(long fzg_id) {
         String s = null;
-        connection = JdbcUtils.getConnectionViaDriverManager( // DB-URL,
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         try (PreparedStatement statement = connection.prepareStatement("SELECT Status FROM FAHRZEUGGERAT f WHERE FZG_ID = ?")) {
             statement.setLong(1, fzg_id);
             ResultSet rs = statement.executeQuery();
@@ -47,8 +44,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
             }
         } catch (SQLException e) {
             throw new RuntimeException();
-        } finally {
-            JdbcUtils.closeConnectionQuietly(connection);
         }
         return s;
     }
@@ -56,9 +51,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 	@Override
 	public int getUsernumber(int maut_id) {
 		int i = 0;
-        connection = JdbcUtils.getConnectionViaDriverManager(
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         try(PreparedStatement statement = connection.prepareStatement(
                 "SELECT Nutzer_ID FROM MAUTERHEBUNG m \n" +
                 "JOIN FAHRZEUGGERAT f ON f.FZG_ID = m.FZG_ID \n" +
@@ -71,8 +63,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            JdbcUtils.closeConnectionQuietly(connection);
         }
         return i;
 	}
@@ -80,9 +70,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 	@Override
 	public void registerVehicle(long fz_id, int sskl_id, int nutzer_id, String kennzeichen, String fin, int achsen,
                                 int gewicht, String zulassungsland) {
-		connection = JdbcUtils.getConnectionViaDriverManager(
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         try (PreparedStatement statement = connection.prepareStatement("Insert into FAHRZEUG " +
                 "(FZ_ID,SSKL_ID,NUTZER_ID,KENNZEICHEN,FIN,ACHSEN,GEWICHT,ANMELDEDATUM,ABMELDEDATUM,ZULASSUNGSLAND) " +
                 "values (?,?,?,?,?,?,?," +
@@ -106,9 +93,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 
 	@Override
 	public void updateStatusForOnBoardUnit(long fzg_id, String status) {
-		Connection connection = JdbcUtils.getConnectionViaDriverManager(
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         try(PreparedStatement statement = connection.prepareStatement("" +
                 "UPDATE FAHRZEUGGERAT SET status = ? WHERE FZG_ID = ?")){
             statement.setString(1, status);
@@ -122,9 +106,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 
 	@Override
 	public void deleteVehicle(long fz_id) {
-		connection = JdbcUtils.getConnectionViaDriverManager(
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         try (PreparedStatement statement = connection.prepareStatement("" +
                 "DELETE FROM FAHRZEUG WHERE fz_id = ?")){
             statement.setLong(1, fz_id);
@@ -137,9 +118,6 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 
 	@Override
 	public List<Mautabschnitt> getTrackInformations(String abschnittstyp) {
-        connection = JdbcUtils.getConnectionViaDriverManager(
-                "jdbc:oracle:thin:@icla3lxc.f4.htw-berlin.de",
-                "u596680", "p596680");
         List<Mautabschnitt> list = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM MAUTABSCHNITT m WHERE Abschnittstyp LIKE ?")) {
