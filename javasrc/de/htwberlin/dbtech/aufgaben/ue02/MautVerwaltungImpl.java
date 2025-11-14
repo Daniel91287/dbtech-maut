@@ -2,6 +2,7 @@ package de.htwberlin.dbtech.aufgaben.ue02;
 
 import java.sql.*;
 import java.text.DateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,8 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 	@Override
 	public String getStatusForOnBoardUnit(long fzg_id) {
         String s = null;
-        try (PreparedStatement statement = connection.prepareStatement("SELECT Status FROM FAHRZEUGGERAT f WHERE FZG_ID = ?")) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT Status FROM FAHRZEUGGERAT f WHERE FZG_ID = ?")) {
             statement.setLong(1, fzg_id);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -81,7 +83,8 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
             statement.setString(5, fin);
             statement.setInt(6, achsen);
             statement.setInt(7, gewicht);
-            statement.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+            statement.setDate(8, Date.valueOf(LocalDate.now()));
+            //statement.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
             statement.setString(9, zulassungsland);
             statement.executeUpdate();
 
@@ -106,7 +109,7 @@ public class MautVerwaltungImpl implements IMautVerwaltung {
 
 	@Override
 	public void deleteVehicle(long fz_id) {
-        try (PreparedStatement statement = connection.prepareStatement("" +
+        try (PreparedStatement statement = connection.prepareStatement(
                 "DELETE FROM FAHRZEUG WHERE fz_id = ?")){
             statement.setLong(1, fz_id);
             statement.executeUpdate();
