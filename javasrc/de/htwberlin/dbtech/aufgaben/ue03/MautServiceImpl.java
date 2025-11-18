@@ -1,6 +1,8 @@
 package de.htwberlin.dbtech.aufgaben.ue03;
 
 import java.sql.Connection;
+
+import de.htwberlin.dbtech.aufgaben.ue03.Mapper.VehicleMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.htwberlin.dbtech.exceptions.DataException;
@@ -33,7 +35,10 @@ public class MautServiceImpl implements IMautService {
 	@Override
 	public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
 			throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
-		// TODO Auto-generated method stub
+        VehicleMapper VehicleMapper = new VehicleMapper(connection);
+        if (null==VehicleMapper.getVehicle(kennzeichen)) {
+            throw new UnkownVehicleException();
+        }
 	}
 
 
