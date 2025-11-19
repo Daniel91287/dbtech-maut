@@ -54,5 +54,23 @@ public class FahrzeugMapper {
         }
         return 0;
     }
+    public Fahrzeug checkFahrzeuggerat(String Kennzeichen) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT f2.* FROM FAHRZEUGGERAT f " +
+                        "INNER JOIN FAHRZEUG f2 ON f.FZ_ID = f2.FZ_ID " +
+                        "WHERE Kennzeichen = ?")) {
+            statement.setString(1, Kennzeichen);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                Fahrzeug Fahrzeug = new Fahrzeug(rs.getLong(1), rs.getInt(2), rs.getInt(3),
+                        rs.getString(4), rs.getString(5), rs.getInt(6),rs.getInt(7),
+                        rs.getDate(8), rs.getDate(9), rs.getString(10));
+                return Fahrzeug;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 
     }

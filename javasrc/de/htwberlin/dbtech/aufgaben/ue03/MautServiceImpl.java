@@ -46,6 +46,15 @@ public class MautServiceImpl implements IMautService {
         if (achszahl != fahrzeugMapper.getAchsen(kennzeichen)){
             throw new InvalidVehicleDataException();
         }
+        //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
+        if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {
+
+        }
+        //wenn Fahrzeuggerät vorhanden
+        else {
+
+        }
+
 	}
 
 
