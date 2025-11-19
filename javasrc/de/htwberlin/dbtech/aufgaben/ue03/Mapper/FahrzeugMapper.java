@@ -5,10 +5,10 @@ import de.htwberlin.dbtech.exceptions.DataException;
 
 import java.sql.*;
 
-public class VehicleMapper {
+public class FahrzeugMapper {
     private Connection connection;
 
-    public VehicleMapper(Connection connection) {
+    public FahrzeugMapper(Connection connection) {
         this.connection = connection;
     }
 
@@ -39,6 +39,20 @@ public class VehicleMapper {
         }
         return null;
     }
+
+    public int getAchsen(String Kennzeichen) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT Achsen FROM FAHRZEUG WHERE Kennezeichen = ?")) {
+            statement.setString(1, Kennzeichen);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int achsen = rs.getInt("Achsen");
+                return achsen;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
     }
 
-
+    }
