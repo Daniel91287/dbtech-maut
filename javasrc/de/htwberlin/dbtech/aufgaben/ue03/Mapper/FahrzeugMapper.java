@@ -42,11 +42,11 @@ public class FahrzeugMapper {
 
     public int getAchsen(String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT Achsen FROM FAHRZEUG WHERE Kennezeichen = ?")) {
+                "SELECT ACHSEN FROM FAHRZEUG WHERE KENNZEICHEN = ?")) {
             statement.setString(1, Kennzeichen);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                int achsen = rs.getInt("Achsen");
+                int achsen = rs.getInt(1);
                 return achsen;
             }
         } catch (SQLException e) {
