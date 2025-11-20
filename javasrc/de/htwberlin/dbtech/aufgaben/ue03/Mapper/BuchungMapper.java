@@ -25,25 +25,26 @@ public class BuchungMapper {
         }
         return connection;
     }
-        public String getAchsenFromBuchung(String Kennzeichen){
+        public int getAchsenFromBuchung(String Kennzeichen){
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM BUCHUNGSTATUS b" +
+                    "SELECT Achszahl FROM BUCHUNGSTATUS b" +
                             "INNER JOIN BUCHUNG B2 ON b.B_ID = B2.B_ID" +
                             "INNER JOIN Mautkategorie M ON B2.KATEGORIE_ID = M.KATEGORIE_ID" +
-                            "WHERE Kennzeichen = ? AND BEFAHRUNGSDATUM is NULL")) {
+                            "WHERE Kennzeichen = ? AND STATUS = 'offen'")) {
                 statement.setString(1, Kennzeichen);
                 ResultSet rs = statement.executeQuery();
                 if (rs.next()) {
-                    Fahrzeug Fahrzeug = new Fahrzeug(rs.getLong(1), rs.getInt(2), rs.getInt(3),
-                            rs.getString(4), rs.getString(5), rs.getInt(6),rs.getInt(7),
-                            rs.getDate(8), rs.getDate(9), rs.getString(10));
-                    return "Fahrzeug";
+                    String Achszahl  = rs.getString("Achszahl");
+                    Achszahl = Achszahl.substring(Achszahl.length()-1);
+                    int Achsen = Integer.parseInt(Achszahl);
+
+                    return Achsen;
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
 
             }
-            return null;
+            return 0;
 
     }
 }
