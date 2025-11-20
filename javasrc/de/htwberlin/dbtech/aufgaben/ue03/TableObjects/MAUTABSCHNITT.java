@@ -25,9 +25,7 @@ public class MAUTABSCHNITT {
         this.ABSCHNITTS_ID = ABSCHNITTS_ID;
     }
 
-    public int getLAENGE() {
-        return LAENGE;
-    }
+    public int getLAENGE() {return LAENGE;}
 
     public void setLAENGE(int LAENGE) {
         this.LAENGE = LAENGE;

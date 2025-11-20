@@ -3,6 +3,7 @@ package de.htwberlin.dbtech.aufgaben.ue03;
 import java.sql.Connection;
 
 import de.htwberlin.dbtech.aufgaben.ue03.Mapper.FahrzeugMapper;
+import de.htwberlin.dbtech.aufgaben.ue03.Mapper.MautabschnittMapper;
 import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.Fahrzeug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +49,12 @@ public class MautServiceImpl implements IMautService {
         }
         //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
         if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {
+            //Manuelles Verfahren durchlaufen
 
         }
         //wenn Fahrzeuggerät vorhanden
-        else {
+        else { MautabschnittMapper mautabschnittMapper =  new MautabschnittMapper(connection);
+            int Laenge = mautabschnittMapper.getLaengeMautabschnitt(mautAbschnitt);
 
         }
 
