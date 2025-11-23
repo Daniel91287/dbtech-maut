@@ -41,7 +41,8 @@ public class MautServiceImpl implements IMautService {
 			throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
         //Prüft ob das Fahzeug bekannt ist
         FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection); //muss noch Abfragen, ob in den Buchungen das Fahrzeug bekannt ist
-        if (null == fahrzeugMapper.getVehicle(kennzeichen)) {
+        BuchungMapper buchungMapper = new  BuchungMapper(connection);
+        if (null == fahrzeugMapper.getVehicle(kennzeichen) && buchungMapper.checkFahreugInBuchung(kennzeichen)) {
             throw new UnkownVehicleException();
         }
         //Prüft die Achsenzahl
@@ -51,7 +52,7 @@ public class MautServiceImpl implements IMautService {
         //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
         if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {
             //Manuelles Verfahren durchlaufen
-            BuchungMapper buchungMapper = new BuchungMapper(connection);
+            //BuchungMapper buchungMapper = new BuchungMapper(connection);
             if (achszahl != buchungMapper.getAchsenFromBuchung(kennzeichen)) {
                 throw new InvalidVehicleDataException();
             }

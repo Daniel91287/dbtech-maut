@@ -27,9 +27,9 @@ public class BuchungMapper {
     }
         public int getAchsenFromBuchung(String Kennzeichen){
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT Achszahl FROM BUCHUNGSTATUS b" +
-                            "INNER JOIN BUCHUNG B2 ON b.B_ID = B2.B_ID" +
-                            "INNER JOIN Mautkategorie M ON B2.KATEGORIE_ID = M.KATEGORIE_ID" +
+                    "SELECT Achszahl FROM BUCHUNGSTATUS b " +
+                            "INNER JOIN BUCHUNG B2 ON b.B_ID = B2.B_ID " +
+                            "INNER JOIN Mautkategorie M ON B2.KATEGORIE_ID = M.KATEGORIE_ID " +
                             "WHERE Kennzeichen = ? AND STATUS = 'offen'")) {
                 statement.setString(1, Kennzeichen);
                 ResultSet rs = statement.executeQuery();
@@ -45,6 +45,23 @@ public class BuchungMapper {
 
             }
             return 0;
+    }
 
+    public boolean checkFahreugInBuchung(String Kennzeichen){
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT Kennzeichen FROM BUCHUNGSTATUS b " +
+                        "INNER JOIN BUCHUNG B2 ON b.B_ID = B2.B_ID " +
+                        "WHERE Kennzeichen = ?")) {
+            statement.setString(1, Kennzeichen);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+
+        }
+        return false;
     }
 }
+
