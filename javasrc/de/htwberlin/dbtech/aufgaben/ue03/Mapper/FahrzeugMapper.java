@@ -22,25 +22,23 @@ public class FahrzeugMapper {
         }
         return connection;
     }
-    public Fahrzeug getVehicle(String Kennzeichen) {
+    public boolean getFahrzeugBekannt(String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM FAHRZEUG WHERE Kennzeichen = ?")) {
             statement.setString(1, Kennzeichen);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                Fahrzeug Fahrzeug = new Fahrzeug(rs.getLong(1), rs.getInt(2), rs.getInt(3),
-                        rs.getString(4), rs.getString(5), rs.getInt(6),rs.getInt(7),
-                        rs.getDate(8), rs.getDate(9), rs.getString(10));
-                return Fahrzeug;
+                return true;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
 
         }
-        return null;
+        BuchungMapper buchungMapper = new BuchungMapper(connection);
+        return buchungMapper.checkFahreugInBuchung(Kennzeichen);
     }
 
-    public int getAchsen(String Kennzeichen) {
+    public int getAchsen(String Kennzeichen, int achszahl) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT ACHSEN FROM FAHRZEUG WHERE KENNZEICHEN = ?")) {
             statement.setString(1, Kennzeichen);
@@ -52,7 +50,8 @@ public class FahrzeugMapper {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
+        BuchungMapper buchungMapper = new BuchungMapper(connection);
+        return buchungMapper.getAchsenFromBuchung(Kennzeichen, achszahl);
     }
     public Fahrzeug checkFahrzeuggerat(String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(

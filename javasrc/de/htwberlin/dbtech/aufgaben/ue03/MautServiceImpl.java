@@ -21,50 +21,49 @@ import de.htwberlin.dbtech.exceptions.UnkownVehicleException;
  */
 public class MautServiceImpl implements IMautService {
 
-	private static final Logger L = LoggerFactory.getLogger(MautServiceImpl.class);
-	private Connection connection;
+    private static final Logger L = LoggerFactory.getLogger(MautServiceImpl.class);
+    private Connection connection;
 
-	@Override
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
+    @Override
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 
-	private Connection getConnection() {
-		if (connection == null) {
-			throw new DataException("Connection not set");
-		}
-		return connection;
-	}
+    private Connection getConnection() {
+        if (connection == null) {
+            throw new DataException("Connection not set");
+        }
+        return connection;
+    }
 
-	@Override
-	public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
-			throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
+    @Override
+    public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
+            throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
         //Prüft ob das Fahzeug bekannt ist
         FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection); //muss noch Abfragen, ob in den Buchungen das Fahrzeug bekannt ist
-        BuchungMapper buchungMapper = new  BuchungMapper(connection);
-        if (null == fahrzeugMapper.getVehicle(kennzeichen) && buchungMapper.checkFahreugInBuchung(kennzeichen)) {
+        BuchungMapper buchungMapper = new BuchungMapper(connection);
+        if (!fahrzeugMapper.getFahrzeugBekannt(kennzeichen)) {
             throw new UnkownVehicleException();
         }
         //Prüft die Achsenzahl
-        if (achszahl != fahrzeugMapper.getAchsen(kennzeichen)){
+        if (achszahl != fahrzeugMapper.getAchsen(kennzeichen, achszahl) || achszahl != buchungMapper.getAchsenFromBuchung(kennzeichen, achszahl)) {
             throw new InvalidVehicleDataException();
         }
         //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
         if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {
             //Manuelles Verfahren durchlaufen
-            //BuchungMapper buchungMapper = new BuchungMapper(connection);
-            if (achszahl != buchungMapper.getAchsenFromBuchung(kennzeichen)) {
-                throw new InvalidVehicleDataException();
+            int BuchungsID = buchungMapper.getBuchungsID(kennzeichen);
+            if (buchungMapper.checkDoppelbefahrung(mautAbschnitt, kennzeichen)) {
+                throw new AlreadyCruisedException();
+            } else {
+                buchungMapper.setBuchungsStatusToAbgeschlossen(BuchungsID);
+                System.out.println("Buchung wurde auf 'Abgeschlossen' gesetzt");
+            }
+            //wenn Fahrzeuggerät vorhanden
+        } else {
+                MautabschnittMapper mautabschnittMapper = new MautabschnittMapper(connection);
+                int Laenge = mautabschnittMapper.getLaengeMautabschnitt(mautAbschnitt);
+
             }
         }
-        //wenn Fahrzeuggerät vorhanden
-        else { MautabschnittMapper mautabschnittMapper =  new MautabschnittMapper(connection);
-            int Laenge = mautabschnittMapper.getLaengeMautabschnitt(mautAbschnitt);
-
-        }
-
-	}
-
-
-
 }

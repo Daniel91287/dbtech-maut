@@ -138,7 +138,7 @@ public class MautServiceTest {
     }
 
     /**
-     * Der Testfall testet die Mauterhebung eines Fahrzeuges im Erfolgsfall.
+     * Der Testfall testet die Mauterheb eines Fahrzeuges im Erfolgsfall.
      *
      */
     @org.junit.Test
