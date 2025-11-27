@@ -39,7 +39,7 @@ public class MautServiceImpl implements IMautService {
     @Override
     public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
             throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
-        //Prüft ob das Fahzeug bekannt ist
+        //Prüft, ob das Fahrzeug bekannt ist
         FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection); //muss noch Abfragen, ob in den Buchungen das Fahrzeug bekannt ist
         BuchungMapper buchungMapper = new BuchungMapper(connection);
         if (!fahrzeugMapper.getFahrzeugBekannt(kennzeichen)) {
@@ -62,8 +62,7 @@ public class MautServiceImpl implements IMautService {
             //wenn Fahrzeuggerät vorhanden
         } else {
                 MautabschnittMapper mautabschnittMapper = new MautabschnittMapper(connection);
-                int Laenge = mautabschnittMapper.getLaengeMautabschnitt(mautAbschnitt);
-
+                mautabschnittMapper.FahrtVerbuchen(mautAbschnitt, achszahl, kennzeichen);
             }
         }
 }

@@ -22,6 +22,7 @@ public class FahrzeugMapper {
         }
         return connection;
     }
+
     public boolean getFahrzeugBekannt(String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM FAHRZEUG WHERE Kennzeichen = ?")) {
@@ -53,6 +54,7 @@ public class FahrzeugMapper {
         BuchungMapper buchungMapper = new BuchungMapper(connection);
         return buchungMapper.getAchsenFromBuchung(Kennzeichen, achszahl);
     }
+
     public Fahrzeug checkFahrzeuggerat(String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT f2.* FROM FAHRZEUGGERAT f " +
@@ -62,7 +64,7 @@ public class FahrzeugMapper {
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 Fahrzeug Fahrzeug = new Fahrzeug(rs.getLong(1), rs.getInt(2), rs.getInt(3),
-                        rs.getString(4), rs.getString(5), rs.getInt(6),rs.getInt(7),
+                        rs.getString(4), rs.getString(5), rs.getInt(6), rs.getInt(7),
                         rs.getDate(8), rs.getDate(9), rs.getString(10));
                 return Fahrzeug;
             }
@@ -71,5 +73,4 @@ public class FahrzeugMapper {
         }
         return null;
     }
-
-    }
+}

@@ -26,19 +26,24 @@ public class MautabschnittMapper {
         return connection;
     }
 
-    public int getLaengeMautabschnitt (int Mautabschnitt) {
+    public void FahrtVerbuchen (int mautAbschnitt, int achszahl, String kennzeichen) {
+        FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection);
+        long FZ_ID = fahrzeugMapper.checkFahrzeuggerat(kennzeichen).getFZ_ID();
+        int SSKL_ID = fahrzeugMapper.checkFahrzeuggerat(kennzeichen).getSSKL_ID();
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT ABSCHNITTS_ID FROM Mautabschnitt m" +
-                        "WHERE ABSCHNITTS_ID = ?")) {
-            statement.setInt(1, Mautabschnitt);
+                "SELECT * FROM MAUTKATEGORIE m " +
+                        "WHERE ACHSZAHL LIKE ? " +
+                        "AND m.SSKL_ID = ?")) {
+            statement.setString(1, "% " + achszahl);
+            statement.setInt(2, SSKL_ID);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                int Laenge = rs.getInt("ABSCHNITTS_ID");
-                return Laenge;
+                double MAUTSATZ_JE_KM = rs.getDouble("MAUTSATZ_JE_KM");
             }
+
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
     }
 }
