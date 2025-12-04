@@ -82,8 +82,8 @@ public class BuchungMapper {
     public void setBuchungsStatusToAbgeschlossen(int Buchung) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "UPDATE BUCHUNG " +
-                        "SET B_ID = 3 " +
-                        "SET Befahrungsdatum = ? " +
+                        "SET B_ID = 3, " +
+                        "Befahrungsdatum = ? " +
                         "WHERE BUCHUNG_ID = ?")) {
             statement.setDate(1, Date.valueOf(LocalDate.now()));
             statement.setInt(2, Buchung);
@@ -97,18 +97,19 @@ public class BuchungMapper {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM BUCHUNG b " +
                         "INNER JOIN MAUTKATEGORIE m ON b.KATEGORIE_ID = m.KATEGORIE_ID " +
-                        "WHERE Kennzeichen = ?")) {
+                        "WHERE Kennzeichen = ? AND B_ID = 1 " +
+                        "ORDER BY b.BUCHUNG_ID DESC")) {
             statement.setString(1, Kennzeichen);
             ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
+            if (rs.next()) {
                 if (rs.getInt("ABSCHNITTS_ID") ==  mautAbschnitt) {
-                    return true;
+                    return false;
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return false;
+        return true;
     }
 }
 
