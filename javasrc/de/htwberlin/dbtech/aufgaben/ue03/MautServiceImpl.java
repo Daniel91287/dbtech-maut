@@ -83,14 +83,14 @@ public class MautServiceImpl implements IMautService {
     public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
             throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
         //Prüft, ob das Fahrzeug bekannt ist
-        FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection); //muss noch Abfragen, ob in den Buchungen das Fahrzeug bekannt ist
+        FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection);
         BuchungMapper buchungMapper = new BuchungMapper(connection);
         if (!fahrzeugMapper.getFahrzeugBekannt(kennzeichen)) {
             throw new UnkownVehicleException();
         }
         //Prüft die Achsenzahl
         if (achszahl != fahrzeugMapper.getAchsen(kennzeichen, achszahl) || achszahl != buchungMapper.getAchsenFromBuchung(kennzeichen, achszahl)) {
-            throw new InvalidVehicleDataException();
+           throw new InvalidVehicleDataException();
         }
         //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
         if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {

@@ -42,7 +42,7 @@ public class BuchungMapper {
                 throw new RuntimeException(e);
 
             }
-            return 0;
+            return achszahl;
     }
 
     public boolean checkFahreugInBuchung(String Kennzeichen){
