@@ -1,7 +1,7 @@
 package de.htwberlin.dbtech.aufgaben.ue03.TableObjects;
 import java.sql.Date;
 
-public class Buchung {
+public class BUCHUNG {
     private	int	BUCHUNG_ID;
     private	int	B_ID;
     private	int	ABSCHNITTS_ID;
@@ -11,7 +11,7 @@ public class Buchung {
     private	Date BEFAHRUNGSDATUM;
     private	Double KOSTEN;
 
-    public Buchung(int BUCHUNG_ID, int b_ID, int ABSCHNITTS_ID, int KATEGORIE_ID, String KENNZEICHEN, Date BUCHUNGSDATUM, Date BEFAHRUNGSDATUM, Double KOSTEN) {
+    public BUCHUNG(int BUCHUNG_ID, int b_ID, int ABSCHNITTS_ID, int KATEGORIE_ID, String KENNZEICHEN, Date BUCHUNGSDATUM, Date BEFAHRUNGSDATUM, Double KOSTEN) {
         this.BUCHUNG_ID = BUCHUNG_ID;
         B_ID = b_ID;
         this.ABSCHNITTS_ID = ABSCHNITTS_ID;

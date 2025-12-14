@@ -1,11 +1,13 @@
 package de.htwberlin.dbtech.aufgaben.ue03;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.time.LocalDate;
 
-import de.htwberlin.dbtech.aufgaben.ue03.Mapper.BuchungMapper;
-import de.htwberlin.dbtech.aufgaben.ue03.Mapper.FahrzeugMapper;
-import de.htwberlin.dbtech.aufgaben.ue03.Mapper.MautabschnittMapper;
-import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.Fahrzeug;
+import de.htwberlin.dbtech.aufgaben.ue03.Mapper.*;
+import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.BUCHUNG;
+import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.FAHRZEUG;
+import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.MAUTERHEBUNG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.htwberlin.dbtech.exceptions.DataException;
@@ -82,30 +84,132 @@ public class MautServiceImpl implements IMautService {
     @Override
     public void berechneMaut(int mautAbschnitt, int achszahl, String kennzeichen)
             throws UnkownVehicleException, InvalidVehicleDataException, AlreadyCruisedException {
-        //Prüft, ob das Fahrzeug bekannt ist
+
         FahrzeugMapper fahrzeugMapper = new FahrzeugMapper(connection);
         BuchungMapper buchungMapper = new BuchungMapper(connection);
-        if (!fahrzeugMapper.getFahrzeugBekannt(kennzeichen)) {
+        MautabschnittMapper mautabschnittMapper = new MautabschnittMapper(connection);
+
+        // Prüft, ob Fahrzeug im automatischen oder manuellen Verfahren fährt
+        boolean fahrzeugExistiert = fahrzeugMapper.existsByKennzeichen(kennzeichen);
+        boolean buchungExistiert = buchungMapper.checkFahreugInBuchung(kennzeichen);
+
+        // Wenn gar kein Fahrzeug gefunden wird
+        if (!fahrzeugExistiert && !buchungExistiert) {
             throw new UnkownVehicleException();
         }
-        //Prüft die Achsenzahl
-        if (achszahl != fahrzeugMapper.getAchsen(kennzeichen, achszahl) || achszahl != buchungMapper.getAchsenFromBuchung(kennzeichen, achszahl)) {
-           throw new InvalidVehicleDataException();
+
+        // Achsenprüfung nur in der Tabelle, in der das Fahrzeug existiert
+        if (fahrzeugExistiert) {
+            int fahrzeugAchsen = fahrzeugMapper.findAchsenByKennzeichen(kennzeichen);
+            if (achszahl != fahrzeugAchsen) {
+                throw new InvalidVehicleDataException();
+            }
+        } else {
+            int buchungsAchsen = buchungMapper.getAchsenFromBuchung(kennzeichen);
+            if (achszahl >= 5) {
+                achszahl = 5;
+            }
+            if (achszahl != buchungsAchsen) {
+                throw new InvalidVehicleDataException();
+            }
         }
-        //Verfahren prüfen ob Zahlung über Fahrzeuggerät oder Buchungsverfahren erfolgt
-        if (null == fahrzeugMapper.checkFahrzeuggerat(kennzeichen)) {
-            //Manuelles Verfahren durchlaufen
-            int BuchungsID = buchungMapper.getBuchungsID(kennzeichen);
+
+        if (buchungExistiert) {
             if (buchungMapper.checkDoppelbefahrung(mautAbschnitt, kennzeichen)) {
                 throw new AlreadyCruisedException();
-            } else {
-                buchungMapper.setBuchungsStatusToAbgeschlossen(BuchungsID);
-                System.out.println("Buchung wurde auf 'Abgeschlossen' gesetzt");
             }
-            //wenn Fahrzeuggerät vorhanden
-        } else {
-                MautabschnittMapper mautabschnittMapper = new MautabschnittMapper(connection);
-                mautabschnittMapper.FahrtVerbuchen(mautAbschnitt, achszahl, kennzeichen);
+            BUCHUNG buchung = buchungMapper.findLatestByKennzeichen(kennzeichen);
+            if (buchung != null) {
+                buchung.setB_ID(3);
+                buchung.setBEFAHRUNGSDATUM(Date.valueOf(LocalDate.now()));
+                buchungMapper.update(buchung);
             }
         }
+
+        if (fahrzeugExistiert) {
+            // Neue Mapper für die Mauterhebung
+            MautkategorieMapper mautkategorieMapper = new MautkategorieMapper(connection);
+            MauterhebungMapper mauterhebungMapper = new MauterhebungMapper(connection);
+
+            // Schadstoffklasse aus Fahrzeug holen
+            int schadstoffklasse = getSchadstoffklasseFromFahrzeug(fahrzeugMapper, kennzeichen);
+
+            // FZG_ID aus FAHRZEUGGERAT holen
+            Long fzgId = getFzgIdFromFahrzeugGerat(kennzeichen);
+            if (fzgId == null) {
+                throw new RuntimeException("FZG_ID nicht gefunden für Fahrzeug: " + kennzeichen);
+            }
+
+            // Achsen begrenzen
+            if (achszahl > 5) {
+                achszahl = 5;
+            }
+
+            // Kategorie-ID basierend auf Schadstoffklasse und Achsen finden
+            int kategorieId = mautkategorieMapper.getKategorieIdBySchadstoffklasseUndAchsen(schadstoffklasse, achszahl);
+            if (kategorieId == -1) {
+                throw new RuntimeException("Keine passende Mautkategorie gefunden für Schadstoffklasse: " + schadstoffklasse + " und Achsen: " + achszahl);
+            }
+
+            // Mautsatz holen
+            double mautsatzJeKm = mautkategorieMapper.getMautsatzByKategorieId(kategorieId);
+
+            // Länge des Mautabschnitts holen
+            int mautLaenge = mautabschnittMapper.getLaengeByAbschnittsId(mautAbschnitt);
+            if (mautLaenge == -1) {
+                throw new RuntimeException("Mautabschnitt nicht gefunden: " + mautAbschnitt);
+            }
+
+            // Kosten berechnen (Formel: (Länge * Mautsatz) / (100 * 1000))
+            double kosten = (mautLaenge * mautsatzJeKm) / (100 * 1000);
+
+            // Nächste MAUT_ID holen
+            int nextMautId = mauterhebungMapper.getNextMautId();
+
+            // MAUTERHEBUNG-Objekt erstellen und speichern
+            MAUTERHEBUNG mauterhebung = new MAUTERHEBUNG(
+                    nextMautId,
+                    mautAbschnitt,
+                    fzgId,
+                    kategorieId,
+                    Date.valueOf(LocalDate.now()),
+                    kosten
+            );
+
+            mauterhebungMapper.insert(mauterhebung);
+        }
+    }
+
+    // Hilfsmethode für Schadstoffklasse
+    private int getSchadstoffklasseFromFahrzeug(FahrzeugMapper fahrzeugMapper, String kennzeichen) {
+        try (var statement = connection.prepareStatement(
+                "SELECT f.SSKL_ID FROM FAHRZEUG f WHERE f.KENNZEICHEN = ?")) {
+            statement.setString(1, kennzeichen);
+            var rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            throw new RuntimeException("Schadstoffklasse nicht gefunden für Fahrzeug: " + kennzeichen);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Hilfsmethode für FZG_ID aus FAHRZEUGGERAT
+    private Long getFzgIdFromFahrzeugGerat(String kennzeichen) {
+        try (var statement = connection.prepareStatement(
+                "SELECT f2.FZG_ID " +
+                        "FROM FAHRZEUG f " +
+                        "INNER JOIN FAHRZEUGGERAT f2 ON f.FZ_ID = f2.FZ_ID " +
+                        "WHERE f.KENNZEICHEN = ?")) {
+            statement.setString(1, kennzeichen);
+            var rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

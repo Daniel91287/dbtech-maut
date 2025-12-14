@@ -2,7 +2,7 @@ package de.htwberlin.dbtech.aufgaben.ue03.TableObjects;
 
 import java.sql.Date;
 
-public class Fahrzeug {
+public class FAHRZEUG {
     private long FZ_ID;
     private int SSKL_ID;
     private int NUTZER_ID;
@@ -14,7 +14,7 @@ public class Fahrzeug {
     private Date ABMELDEDATUM;
     private String ZULASSUNGSLAND;
 
-    public Fahrzeug(long FZ_ID, int SSKL_ID, int NUTZER_ID, String KENNZEICHEN, String FIN, int ACHSEN, int GEWICHT, Date ANMELDEDATUM, Date ABMELDEDATUM, String ZULASSUNGSLAND) {
+    public FAHRZEUG(long FZ_ID, int SSKL_ID, int NUTZER_ID, String KENNZEICHEN, String FIN, int ACHSEN, int GEWICHT, Date ANMELDEDATUM, Date ABMELDEDATUM, String ZULASSUNGSLAND) {
         this.FZ_ID = FZ_ID;
         this.SSKL_ID = SSKL_ID;
         this.NUTZER_ID = NUTZER_ID;

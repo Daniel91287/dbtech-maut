@@ -1,6 +1,7 @@
 package de.htwberlin.dbtech.aufgaben.ue03.Mapper;
 
-import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.Fahrzeug;
+import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.FAHRZEUG;
+import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.MAUTABSCHNITT;
 import de.htwberlin.dbtech.aufgaben.ue03.TableObjects.SCHADSTOFFKLASSE;
 import de.htwberlin.dbtech.exceptions.DataException;
 
@@ -23,6 +24,109 @@ public class MautabschnittMapper {
             throw new DataException("Connection not set");
         }
         return connection;
+    }
+
+    public void insert(MAUTABSCHNITT mautabschnitt) {
+        try (PreparedStatement statement = getConnection().prepareStatement(
+                "INSERT INTO MAUTABSCHNITT " +
+                        "(ABSCHNITTS_ID, LAENGE, START_KOORDINATE, ZIEL_KOORDINATE, NAME, ABSCHNITTSTYP) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)")) {
+
+            statement.setInt(1, mautabschnitt.getABSCHNITTS_ID());
+            statement.setInt(2, mautabschnitt.getLAENGE());
+            statement.setString(3, mautabschnitt.getSTART_KOORDINATE());
+            statement.setString(4, mautabschnitt.getZIEL_KOORDINATE());
+            statement.setString(5, mautabschnitt.getNAME());
+            statement.setString(6, mautabschnitt.getABSCHNITTSTYP());
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Insert von MAUTABSCHNITT", e);
+        }
+    }
+
+    public void update(MAUTABSCHNITT mautabschnitt) {
+        try (PreparedStatement statement = getConnection().prepareStatement(
+                "UPDATE MAUTABSCHNITT SET " +
+                        "LAENGE = ?, " +
+                        "START_KOORDINATE = ?, " +
+                        "ZIEL_KOORDINATE = ?, " +
+                        "NAME = ?, " +
+                        "ABSCHNITTSTYP = ? " +
+                        "WHERE ABSCHNITTS_ID = ?")) {
+
+            statement.setInt(1, mautabschnitt.getLAENGE());
+            statement.setString(2, mautabschnitt.getSTART_KOORDINATE());
+            statement.setString(3, mautabschnitt.getZIEL_KOORDINATE());
+            statement.setString(4, mautabschnitt.getNAME());
+            statement.setString(5, mautabschnitt.getABSCHNITTSTYP());
+            statement.setInt(6, mautabschnitt.getABSCHNITTS_ID());
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Update von MAUTABSCHNITT", e);
+        }
+    }
+
+    public void delete(int abschnittsId) {
+        try (PreparedStatement statement = getConnection().prepareStatement(
+                "DELETE FROM MAUTABSCHNITT WHERE ABSCHNITTS_ID = ?")) {
+
+            statement.setInt(1, abschnittsId);
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Löschen von MAUTABSCHNITT", e);
+        }
+    }
+
+    public MAUTABSCHNITT findById(int abschnittsId) {
+        try (PreparedStatement statement = getConnection().prepareStatement(
+                "SELECT * FROM MAUTABSCHNITT WHERE ABSCHNITTS_ID = ?")) {
+
+            statement.setInt(1, abschnittsId);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+
+            return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Select von MAUTABSCHNITT per ID", e);
+        }
+    }
+
+    private MAUTABSCHNITT mapRow(ResultSet rs) throws SQLException {
+        return new MAUTABSCHNITT(
+                rs.getInt("ABSCHNITTS_ID"),
+                rs.getInt("LAENGE"),
+                rs.getString("START_KOORDINATE"),
+                rs.getString("ZIEL_KOORDINATE"),
+                rs.getString("NAME"),
+                rs.getString("ABSCHNITTSTYP")
+        );
+    }
+
+    public int getLaengeByAbschnittsId(int abschnittsId) {
+        try (PreparedStatement statement = getConnection().prepareStatement(
+                "SELECT LAENGE FROM MAUTABSCHNITT WHERE ABSCHNITTS_ID = ?")) {
+
+            statement.setInt(1, abschnittsId);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("LAENGE");
+            }
+
+            return -1;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Abrufen der Länge von MAUTABSCHNITT", e);
+        }
     }
 
     public void FahrtVerbuchen (int mautAbschnitt, int achszahl, String kennzeichen) {
