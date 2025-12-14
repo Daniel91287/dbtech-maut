@@ -109,31 +109,17 @@ public class MauterhebungMapper {
         );
     }
 
-    // Zusätzliche Hilfsmethoden
     public int getNextMautId() {
         try (PreparedStatement statement = getConnection().prepareStatement(
-                "SELECT COALESCE(MAX(MAUT_ID), 0) + 1 FROM MAUTERHEBUNG")) {
+                "SELECT COALESCE(MAX(MAUT_ID), 0) + 1 FROM MAUTERHEBUNG")) { //null behandlung
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
             }
-            return 1; // Erste ID falls Tabelle leer
+            return 1;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public boolean existsByAbschnittAndFzgIdAndDate(int abschnittsId, long fzgId, Date datum) {
-        try (PreparedStatement statement = getConnection().prepareStatement(
-                "SELECT 1 FROM MAUTERHEBUNG " +
-                        "WHERE ABSCHNITTS_ID = ? AND FZG_ID = ? AND BEFAHRUNGSDATUM = ?")) {
-            statement.setInt(1, abschnittsId);
-            statement.setLong(2, fzgId);
-            statement.setDate(3, datum);
-            ResultSet rs = statement.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -126,18 +126,6 @@ public class BuchungMapper {
         }
     }
 
-    private BUCHUNG mapRow(ResultSet rs) throws SQLException {
-        return new BUCHUNG(
-                rs.getInt("BUCHUNG_ID"),
-                rs.getInt("B_ID"),
-                rs.getInt("ABSCHNITTS_ID"),
-                rs.getInt("KATEGORIE_ID"),
-                rs.getString("KENNZEICHEN"),
-                rs.getDate("BUCHUNGSDATUM"),
-                rs.getDate("BEFAHRUNGSDATUM"),
-                rs.getDouble("KOSTEN")
-        );
-    }
 
     public int getAchsenFromBuchung(String kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -181,38 +169,6 @@ public class BuchungMapper {
         return false;
     }
 
-    public int getBuchungsID(String Kennzeichen) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM BUCHUNG b " +
-                        "INNER JOIN BUCHUNGSTATUS B2 ON b.B_ID = B2.B_ID " +
-                        "WHERE Kennzeichen = ?")) {
-            statement.setString(1, Kennzeichen);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                if (rs.getString("STATUS").equals("offen")) {
-                    return rs.getInt("BUCHUNG_ID");
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return 0;
-    }
-
-    public void setBuchungsStatusToAbgeschlossen(int Buchung) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE BUCHUNG " +
-                        "SET B_ID = 3, " +
-                        "Befahrungsdatum = ? " +
-                        "WHERE BUCHUNG_ID = ?")) {
-            statement.setDate(1, Date.valueOf(LocalDate.now()));
-            statement.setInt(2, Buchung);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public boolean checkDoppelbefahrung(int mautAbschnitt, String Kennzeichen) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM BUCHUNG b " +
@@ -230,6 +186,19 @@ public class BuchungMapper {
             throw new RuntimeException(e);
         }
         return true;
+    }
+
+    private BUCHUNG mapRow(ResultSet rs) throws SQLException {
+        return new BUCHUNG(
+                rs.getInt("BUCHUNG_ID"),
+                rs.getInt("B_ID"),
+                rs.getInt("ABSCHNITTS_ID"),
+                rs.getInt("KATEGORIE_ID"),
+                rs.getString("KENNZEICHEN"),
+                rs.getDate("BUCHUNGSDATUM"),
+                rs.getDate("BEFAHRUNGSDATUM"),
+                rs.getDouble("KOSTEN")
+        );
     }
 }
 

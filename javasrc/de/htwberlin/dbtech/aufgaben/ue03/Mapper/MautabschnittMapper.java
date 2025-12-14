@@ -100,16 +100,6 @@ public class MautabschnittMapper {
         }
     }
 
-    private MAUTABSCHNITT mapRow(ResultSet rs) throws SQLException {
-        return new MAUTABSCHNITT(
-                rs.getInt("ABSCHNITTS_ID"),
-                rs.getInt("LAENGE"),
-                rs.getString("START_KOORDINATE"),
-                rs.getString("ZIEL_KOORDINATE"),
-                rs.getString("NAME"),
-                rs.getString("ABSCHNITTSTYP")
-        );
-    }
 
     public int getLaengeByAbschnittsId(int abschnittsId) {
         try (PreparedStatement statement = getConnection().prepareStatement(
@@ -202,5 +192,16 @@ public class MautabschnittMapper {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private MAUTABSCHNITT mapRow(ResultSet rs) throws SQLException {
+        return new MAUTABSCHNITT(
+                rs.getInt("ABSCHNITTS_ID"),
+                rs.getInt("LAENGE"),
+                rs.getString("START_KOORDINATE"),
+                rs.getString("ZIEL_KOORDINATE"),
+                rs.getString("NAME"),
+                rs.getString("ABSCHNITTSTYP")
+        );
     }
 }

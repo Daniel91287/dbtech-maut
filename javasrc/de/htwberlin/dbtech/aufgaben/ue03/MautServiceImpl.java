@@ -127,7 +127,7 @@ public class MautServiceImpl implements IMautService {
         }
 
         if (fahrzeugExistiert) {
-            // Neue Mapper für die Mauterhebung
+
             MautkategorieMapper mautkategorieMapper = new MautkategorieMapper(connection);
             MauterhebungMapper mauterhebungMapper = new MauterhebungMapper(connection);
 
@@ -141,7 +141,7 @@ public class MautServiceImpl implements IMautService {
             }
 
             // Achsen begrenzen
-            if (achszahl > 5) {
+            if (achszahl > 5) { //unschöne implementierung, noch Ändern
                 achszahl = 5;
             }
 
@@ -160,8 +160,8 @@ public class MautServiceImpl implements IMautService {
                 throw new RuntimeException("Mautabschnitt nicht gefunden: " + mautAbschnitt);
             }
 
-            // Kosten berechnen (Formel: (Länge * Mautsatz) / (100 * 1000))
-            double kosten = (mautLaenge * mautsatzJeKm) / (100 * 1000);
+            // Kosten berechnen
+            double kosten = (mautLaenge * mautsatzJeKm) / (100 * 1000); //BigDecimal besser?
 
             // Nächste MAUT_ID holen
             int nextMautId = mauterhebungMapper.getNextMautId();

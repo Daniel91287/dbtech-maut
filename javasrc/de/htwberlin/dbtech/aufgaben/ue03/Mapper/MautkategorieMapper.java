@@ -135,18 +135,4 @@ public class MautkategorieMapper {
         }
     }
 
-    public MAUTKATEGORIE findBySchadstoffklasseUndAchsen(int schadstoffklasse, int achsen) {
-        try (PreparedStatement statement = getConnection().prepareStatement(
-                "SELECT * FROM MAUTKATEGORIE WHERE SSKL_ID = ? AND ACHSZAHL = ?")) {
-            statement.setInt(1, schadstoffklasse);
-            statement.setInt(2, achsen);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
